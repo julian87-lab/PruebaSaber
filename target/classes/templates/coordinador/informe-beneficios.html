@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Informe de Beneficios</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/estudiantes.css}">
+</head>
+<body>
+<div class="container py-4 page-max">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 app-page-header">
+        <div class="d-flex align-items-center gap-3">
+            <div class="app-icon-circle">
+                <i class="bi bi-gift fs-4"></i>
+            </div>
+            <div>
+                <h1 class="h3 mb-1 app-page-title">Informe de Beneficios</h1>
+                <p class="app-page-subtitle mb-0">Estudiantes con estímulos aplicables según el acuerdo institucional.</p>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a th:href="@{/dashboard/coordinador}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver al panel
+            </a>
+            <a th:href="@{/docs/ACUERDO-No.-01-009-CONSEJO-DIRECTIVO-Reglamento-de-Estimulos.pdf}"
+               target="_blank"
+               class="btn btn-primary">
+                <i class="bi bi-file-earmark-pdf"></i> Ver PDF oficial
+            </a>
+        </div>
+    </div>
+
+    <section class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 app-stat-card">
+                <div class="card-body">
+                    <small class="text-muted d-block">Beneficiados</small>
+                    <h3 class="mb-1" th:text="${totalBeneficiados}">0</h3>
+                    <span class="text-muted">Con estímulo aplicable</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 app-stat-card">
+                <div class="card-body">
+                    <small class="text-muted d-block">Regla</small>
+                    <h3 class="mb-1 text-success">T&T / Saber Pro</h3>
+                    <span class="text-muted">Según tipo de programa</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 app-stat-card">
+                <div class="card-body">
+                    <small class="text-muted d-block">Vigencia</small>
+                    <h3 class="mb-1 text-primary">1 año</h3>
+                    <span class="text-muted">Desde resultados ICFES</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Documento</th>
+                        <th>Nombre completo</th>
+                        <th>Programa</th>
+                        <th>Tipo prueba</th>
+                        <th>Puntaje global</th>
+                        <th>Rango</th>
+                        <th>Nota</th>
+                        <th>Beca</th>
+                        <th>Beneficio</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(beneficios)}">
+                        <td colspan="9" class="text-center text-muted py-4">No hay estudiantes con beneficios aplicables.</td>
+                    </tr>
+                    <tr th:each="fila : ${beneficios}">
+                        <td th:text="${fila.estudiante.numeroDocumento}">100</td>
+                        <td th:text="${fila.estudiante.primerNombre + ' ' + fila.estudiante.primerApellido}">Nombre</td>
+                        <td th:text="${fila.estudiante.programa != null ? fila.estudiante.programa : '-'}">Programa</td>
+                        <td th:text="${fila.beneficio.tipoPrueba}">Saber Pro</td>
+                        <td th:text="${fila.resultado.puntajeGlobal}">0</td>
+                        <td th:text="${fila.beneficio.rango}">241 o más</td>
+                        <td th:text="${fila.beneficio.notaSeminario}">5.0</td>
+                        <td>
+                            <span class="badge bg-success" th:text="${fila.beneficio.porcentajeBeca}">100%</span>
+                        </td>
+                        <td th:text="${fila.beneficio.descripcion}">Descripción</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="alert alert-info mt-3 mb-0">
+                La beca del derecho pecuniario de grado no es acumulable ni transferible y su vigencia es de un (1) año desde la divulgación oficial del ICFES.
+            </div>
+        </div>
+    </section>
+
+</div>
+</body>
+</html>

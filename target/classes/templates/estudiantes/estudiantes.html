@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Estudiantes</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/estudiantes.css}">
+</head>
+<body class="bg-light">
+
+<div class="container py-4 page-max">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="app-icon-circle">
+                <i class="bi bi-mortarboard-fill fs-4"></i>
+            </div>
+            <div>
+                <h1 class="h3 mb-1">Gestión de Estudiantes</h1>
+                <p class="text-muted mb-0">Administra estudiantes, filtros, detalle e importación.</p>
+            </div>
+        </div>
+        <a th:href="@{/dashboard/admin}" class="btn btn-outline-secondary" sec:authorize="hasRole('ADMIN')">
+            <i class="bi bi-arrow-left"></i> Volver al panel
+        </a>
+        <a th:href="@{/dashboard/coordinador}" class="btn btn-outline-secondary" sec:authorize="hasRole('COORDINADOR')">
+            <i class="bi bi-arrow-left"></i> Volver al panel
+        </a>
+        <a th:href="@{/dashboard/docente}" class="btn btn-outline-secondary" sec:authorize="hasRole('DOCENTE')">
+            <i class="bi bi-arrow-left"></i> Volver al panel
+        </a>
+    </div>
+
+    <div th:if="${mensajeExito}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <span th:text="${mensajeExito}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${mensajeError}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <span th:text="${mensajeError}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 app-stat-card">
+                <div class="card-body">
+                    <small class="text-muted d-block">Total estudiantes</small>
+                    <h3 class="mb-0" th:text="${totalEstudiantes}">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 app-stat-card">
+                <div class="card-body">
+                    <small class="text-muted d-block">Activos</small>
+                    <h3 class="mb-0 text-success" th:text="${totalActivos}">0</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 app-stat-card">
+                <div class="card-body">
+                    <small class="text-muted d-block">Inactivos</small>
+                    <h3 class="mb-0 text-danger" th:text="${totalInactivos}">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-funnel section-title-icon"></i>
+                <h2 class="h5 mb-0">Buscar y filtrar</h2>
+            </div>
+
+            <form th:action="@{/estudiantes}" method="get" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Búsqueda</label>
+                    <input type="text" class="form-control" name="q"
+                           placeholder="Buscar por nombre o documento"
+                           th:value="${q}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Estado</label>
+                    <select name="estado" class="form-select">
+                        <option value="" th:selected="${estado == null || estado == ''}">Todos</option>
+                        <option value="activos" th:selected="${estado == 'activos'}">Activos</option>
+                        <option value="inactivos" th:selected="${estado == 'inactivos'}">Inactivos</option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search"></i> Filtrar
+                    </button>
+                    <a th:href="@{/estudiantes}" class="btn btn-outline-secondary w-100">Limpiar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <section class="card shadow-sm border-0 mb-4" sec:authorize="hasRole('ADMIN')">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-file-earmark-arrow-up section-title-icon"></i>
+                <h2 class="h5 mb-0">Importar estudiantes desde Excel</h2>
+            </div>
+
+            <form th:action="@{/estudiantes/importar}" method="post" enctype="multipart/form-data" class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Archivo Excel</label>
+                    <input type="file" class="form-control" name="file" accept=".xlsx">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Periodo</label>
+                    <input type="text" class="form-control" name="periodo" placeholder="Ejemplo: 2026-1" required>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="bi bi-upload"></i> Importar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="card shadow-sm border-0 mb-4" sec:authorize="hasRole('ADMIN')">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-person-plus section-title-icon"></i>
+                <h2 class="h5 mb-0" th:text="${modoEdicion ? 'Editar estudiante' : 'Nuevo estudiante'}">Nuevo estudiante</h2>
+            </div>
+
+            <p class="text-muted"
+               th:text="${modoEdicion ? 'Actualiza la información del estudiante seleccionado.' : 'Registra un estudiante manualmente en el sistema.'}">
+                Registra un estudiante manualmente en el sistema.
+            </p>
+
+            <form th:action="${modoEdicion} ? @{/estudiantes/actualizar/{id}(id=${nuevoEstudiante.id})} : @{/estudiantes/guardar}"
+                  th:object="${nuevoEstudiante}" method="post" class="row g-3">
+
+                <div class="col-md-3">
+                    <label class="form-label">Tipo documento</label>
+                    <select th:field="*{tipoDocumento}" class="form-select">
+                        <option value="CC">Cédula de Ciudadanía</option>
+                        <option value="TI">Tarjeta de Identidad</option>
+                        <option value="CE">Cédula de Extranjería</option>
+                        <option value="PA">Pasaporte</option>
+                    </select>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('tipoDocumento')}" th:errors="*{tipoDocumento}"></div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Número documento</label>
+                    <input type="text" th:field="*{numeroDocumento}" class="form-control">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('numeroDocumento')}" th:errors="*{numeroDocumento}"></div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Primer nombre</label>
+                    <input type="text" th:field="*{primerNombre}" class="form-control">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('primerNombre')}" th:errors="*{primerNombre}"></div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Segundo nombre</label>
+                    <input type="text" th:field="*{segundoNombre}" class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Primer apellido</label>
+                    <input type="text" th:field="*{primerApellido}" class="form-control">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('primerApellido')}" th:errors="*{primerApellido}"></div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Segundo apellido</label>
+                    <input type="text" th:field="*{segundoApellido}" class="form-control">
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Correo electrónico</label>
+                    <input type="email" th:field="*{correoElectronico}" class="form-control">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('correoElectronico')}" th:errors="*{correoElectronico}"></div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Teléfono</label>
+                    <input type="text" th:field="*{numeroTelefono}" class="form-control">
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Código estudiante</label>
+                    <input type="text" th:field="*{codigoEstudiante}" class="form-control">
+                    <div class="form-text">Si lo dejas vacío, el sistema genera uno automáticamente.</div>
+                    <div class="text-danger small" th:if="${#fields.hasErrors('codigoEstudiante')}" th:errors="*{codigoEstudiante}"></div>
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Semestre</label>
+                    <input type="number" th:field="*{semestre}" min="1" max="20" class="form-control">
+                    <div class="text-danger small" th:if="${#fields.hasErrors('semestre')}" th:errors="*{semestre}"></div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Programa</label>
+                    <input type="text" th:field="*{programa}" class="form-control">
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Tipo programa</label>
+                    <select th:field="*{tipoPrograma}" class="form-select">
+                        <option value="">Seleccione</option>
+                        <option value="Profesional">Profesional</option>
+                        <option value="Tecnólogo">Tecnólogo</option>
+                        <option value="Técnico">Técnico</option>
+                    </select>
+                </div>
+
+                <div class="col-12">
+                    <div class="alert alert-info mb-0">
+                        El sistema puede usar este registro para asociar resultados y seguimiento académico.
+                    </div>
+                </div>
+
+                <div class="col-12 d-flex gap-2 flex-wrap">
+                    <button type="submit" class="btn btn-primary"
+                            th:text="${modoEdicion ? 'Guardar cambios' : 'Crear estudiante'}">
+                        Crear estudiante
+                    </button>
+
+                    <a th:if="${modoEdicion}" th:href="@{/estudiantes}" class="btn btn-outline-secondary">
+                        Cancelar edición
+                    </a>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-table section-title-icon"></i>
+                <h2 class="h5 mb-0">Listado de estudiantes</h2>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Documento</th>
+                        <th>Nombre completo</th>
+                        <th>Programa</th>
+                        <th>Semestre</th>
+                        <th>Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(estudiantes)}">
+                        <td colspan="6" class="text-center text-muted py-4">No hay estudiantes registrados todavía.</td>
+                    </tr>
+
+                    <tr th:each="est : ${estudiantes}">
+                        <td th:text="${est.numeroDocumento}">123</td>
+                        <td th:text="${est.primerNombre + ' ' + est.primerApellido + (est.segundoApellido != null ? ' ' + est.segundoApellido : '')}">
+                            Nombre completo
+                        </td>
+                        <td th:text="${est.programa != null && !est.programa.isBlank() ? est.programa : 'Sin programa'}">Programa</td>
+                        <td th:text="${est.semestre != null ? est.semestre : '-'}">-</td>
+                        <td>
+                            <span th:if="${est.activo}" class="badge bg-success">Activo</span>
+                            <span th:unless="${est.activo}" class="badge bg-danger">Inactivo</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a th:href="@{/estudiantes/detalle/{id}(id=${est.id})}" class="btn btn-outline-primary">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                <a sec:authorize="hasRole('ADMIN')"
+                                   th:href="@{/estudiantes/editar/{id}(id=${est.id})}"
+                                   class="btn btn-outline-warning">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+
+                                <a sec:authorize="hasRole('ADMIN')"
+                                   th:if="${est.activo}"
+                                   th:href="@{/estudiantes/desactivar/{id}(id=${est.id})}"
+                                   class="btn btn-outline-danger"
+                                   onclick="return confirm('¿Desactivar este estudiante?')">
+                                    <i class="bi bi-person-x"></i>
+                                </a>
+
+                                <a sec:authorize="hasRole('ADMIN')"
+                                   th:unless="${est.activo}"
+                                   th:href="@{/estudiantes/activar/{id}(id=${est.id})}"
+                                   class="btn btn-outline-success"
+                                   onclick="return confirm('¿Activar este estudiante?')">
+                                    <i class="bi bi-person-check"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

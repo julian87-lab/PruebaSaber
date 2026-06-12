@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Informe Detallado de Resultados</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="stylesheet" th:href="@{/css/estudiantes.css}">
+</head>
+<body>
+<div class="container py-4 page-max">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 app-page-header">
+        <div class="d-flex align-items-center gap-3">
+            <div class="app-icon-circle">
+                <i class="bi bi-bar-chart-line fs-4"></i>
+            </div>
+            <div>
+                <h1 class="h3 mb-1 app-page-title">Informe Detallado de Resultados</h1>
+                <p class="app-page-subtitle mb-0">Consulta académica general con filtros por periodo, texto y beneficio aplicable.</p>
+            </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+            <a th:href="@{/dashboard/coordinador}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver al panel
+            </a>
+            <a th:href="@{/docs/ACUERDO-No.-01-009-CONSEJO-DIRECTIVO-Reglamento-de-Estimulos.pdf}"
+               target="_blank"
+               class="btn btn-outline-danger">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Ver acuerdo
+            </a>
+            <button class="btn btn-primary" type="button">
+                <i class="bi bi-file-earmark-excel"></i> Exportar a Excel
+            </button>
+        </div>
+    </div>
+
+    <section class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form class="row g-3 align-items-end" method="get" th:action="@{/dashboard/coordinador/informe-resultados}">
+                <div class="col-md-5">
+                    <label class="form-label">Buscar</label>
+                    <input type="text" class="form-control" name="q" th:value="${q}" placeholder="Nombre, apellido o documento">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Periodo</label>
+                    <select class="form-select" name="periodo">
+                        <option value="">-- Todos los periodos --</option>
+                        <option th:each="p : ${periodos}"
+                                th:value="${p}"
+                                th:text="${p}"
+                                th:selected="${periodo == p}">
+                        </option>
+                    </select>
+                </div>
+                <div class="col-md-3 d-grid">
+                    <button class="btn btn-primary" type="submit">
+                        <i class="bi bi-funnel"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <section class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 app-stat-card">
+                <div class="card-body">
+                    <small class="text-muted d-block">Resultados</small>
+                    <h3 class="mb-1" th:text="${totalResultados}">0</h3>
+                    <span class="text-muted">Total cargados</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 app-stat-card">
+                <div class="card-body">
+                    <small class="text-muted d-block">Periodo filtrado</small>
+                    <h3 class="mb-1 text-success" th:text="${periodo != null && !periodo.isBlank() ? periodo : 'Todos'}">Todos</h3>
+                    <span class="text-muted">Vista actual</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100 app-stat-card">
+                <div class="card-body">
+                    <small class="text-muted d-block">Consulta</small>
+                    <h3 class="mb-1 text-primary" th:text="${q != null && !q.isBlank() ? q : 'General'}">General</h3>
+                    <span class="text-muted">Texto aplicado</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="alert alert-info mb-3">
+                El beneficio mostrado se calcula según el tipo de programa del estudiante y el puntaje global registrado,
+                tomando como referencia el acuerdo institucional de estímulos para pruebas Saber T&amp;T y Saber Pro.
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Documento</th>
+                        <th>Estudiante</th>
+                        <th>Programa</th>
+                        <th>Tipo prueba</th>
+                        <th>Puntaje global</th>
+                        <th>Nivel global</th>
+                        <th>Com. escrita</th>
+                        <th>Raz. cuantitativo</th>
+                        <th>Lectura crítica</th>
+                        <th>Inglés</th>
+                        <th>Periodo</th>
+                        <th>Beneficio</th>
+                        <th>Detalle</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(filasResultados)}">
+                        <td colspan="13" class="text-center text-muted py-4">No hay resultados para mostrar.</td>
+                    </tr>
+
+                    <tr th:each="fila : ${filasResultados}">
+                        <td th:text="${fila.resultado.estudiante != null ? fila.resultado.estudiante.numeroDocumento : '-'}">100</td>
+                        <td th:text="${fila.resultado.estudiante != null ? fila.resultado.estudiante.primerNombre + ' ' + fila.resultado.estudiante.primerApellido : '-'}">Nombre</td>
+                        <td th:text="${fila.resultado.estudiante != null && fila.resultado.estudiante.programa != null ? fila.resultado.estudiante.programa : '-'}">Programa</td>
+                        <td th:text="${fila.beneficio.tipoPrueba}">Saber Pro</td>
+                        <td th:text="${fila.resultado.puntajeGlobal != null ? fila.resultado.puntajeGlobal : '-'}">0</td>
+                        <td th:text="${fila.resultado.nivelPuntajeGlobal != null ? fila.resultado.nivelPuntajeGlobal : '-'}">Nivel</td>
+                        <td th:text="${fila.resultado.comunicacionEscrita != null ? fila.resultado.comunicacionEscrita : '-'}">0</td>
+                        <td th:text="${fila.resultado.razonamientoCuantitativo != null ? fila.resultado.razonamientoCuantitativo : '-'}">0</td>
+                        <td th:text="${fila.resultado.lecturaCritica != null ? fila.resultado.lecturaCritica : '-'}">0</td>
+                        <td th:text="${fila.resultado.ingles != null ? fila.resultado.ingles : '-'}">0</td>
+                        <td th:text="${fila.resultado.periodo != null ? fila.resultado.periodo : '-'}">2026-1</td>
+                        <td>
+                            <span th:if="${fila.beneficio.aplica}" class="badge bg-success" th:text="${fila.beneficio.porcentajeBeca + ' - ' + fila.beneficio.rango}">
+                                50% - 211-240
+                            </span>
+                            <span th:unless="${fila.beneficio.aplica}" class="badge bg-secondary">
+                                No aplica
+                            </span>
+                        </td>
+                        <td>
+                            <a th:if="${fila.resultado.estudiante != null}"
+                               th:href="@{/estudiantes/detalle/{id}(id=${fila.resultado.estudiante.id})}"
+                               class="btn btn-sm btn-outline-primary">
+                                Ver
+                            </a>
+                            <span th:unless="${fila.resultado.estudiante != null}" class="text-muted">-</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

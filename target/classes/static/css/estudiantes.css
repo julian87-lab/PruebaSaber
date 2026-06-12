@@ -1,0 +1,32 @@
+.page-max {
+  max-width: 1280px;
+}
+
+.section-title-icon {
+  color: var(--uts-vino);
+}
+
+.table td .btn-group-sm > .btn,
+.table td .btn-sm {
+  border-radius: 10px;
+}
+
+.table td .btn-group-sm {
+  gap: 0.35rem;
+}
+
+.table td .btn-group-sm > .btn {
+  margin-right: 0.2rem;
+}
+
+.card .alert:last-child,
+.card .form-text:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+  .table td,
+  .table th {
+    white-space: nowrap;
+  }
+}

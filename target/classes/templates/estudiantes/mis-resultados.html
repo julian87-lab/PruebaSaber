@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo}">Mis resultados</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/estudiantes.css}">
+</head>
+<body class="bg-light">
+
+<div class="container py-4 page-max">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="app-icon-circle">
+                <i class="bi bi-bar-chart-line fs-4"></i>
+            </div>
+            <div>
+                <h1 class="h3 mb-1">Mis resultados</h1>
+                <p class="text-muted mb-0">Consulta los resultados registrados de tus pruebas académicas.</p>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a th:href="@{/dashboard/estudiante}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver al panel
+            </a>
+            <a th:href="@{/mis-beneficios}" class="btn btn-outline-primary">
+                <i class="bi bi-gift me-1"></i> Ver mis beneficios
+            </a>
+        </div>
+    </div>
+
+    <section class="card shadow-sm border-0 mb-4" th:if="${estudiante != null}">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Nombre completo</small>
+                        <strong th:text="${estudiante.primerNombre + ' ' + estudiante.primerApellido + (estudiante.segundoApellido != null ? ' ' + estudiante.segundoApellido : '')}">
+                            Nombre
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Documento</small>
+                        <strong th:text="${estudiante.numeroDocumento != null ? estudiante.numeroDocumento : '-'}">123</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Programa</small>
+                        <strong th:text="${estudiante.programa != null && !estudiante.programa.isBlank() ? estudiante.programa : 'No registrado'}">Programa</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Tipo programa</small>
+                        <strong th:text="${estudiante.tipoPrograma != null && !estudiante.tipoPrograma.isBlank() ? estudiante.tipoPrograma : 'No registrado'}">Profesional</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-graph-up-arrow section-title-icon"></i>
+                <h2 class="h5 mb-0">Resumen</h2>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Total resultados</small>
+                        <strong th:text="${resultados != null ? #lists.size(resultados) : 0}">0</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Mejor puntaje global</small>
+                        <strong th:text="${mejorPuntaje != null ? mejorPuntaje : '-'}">0</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Promedio global</small>
+                        <strong th:text="${promedioGlobal != null ? promedioGlobal : '-'}">0</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-table section-title-icon"></i>
+                <h2 class="h5 mb-0">Resultados registrados</h2>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Periodo</th>
+                        <th>Puntaje global</th>
+                        <th>Nivel global</th>
+                        <th>Lectura crítica</th>
+                        <th>Razonamiento cuantitativo</th>
+                        <th>Competencias ciudadanas</th>
+                        <th>Comunicación escrita</th>
+                        <th>Inglés</th>
+                        <th>Nivel inglés</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${resultados == null || #lists.isEmpty(resultados)}">
+                        <td colspan="9" class="text-center text-muted py-4">
+                            No tienes resultados registrados en este momento.
+                        </td>
+                    </tr>
+
+                    <tr th:each="r : ${resultados}">
+                        <td th:text="${r.periodo != null ? r.periodo : '-'}">2026-1</td>
+                        <td th:text="${r.puntajeGlobal != null ? r.puntajeGlobal : '-'}">0</td>
+                        <td>
+                            <span class="badge bg-primary"
+                                  th:text="${r.nivelPuntajeGlobal != null ? r.nivelPuntajeGlobal : '-'}">
+                                Nivel
+                            </span>
+                        </td>
+                        <td th:text="${r.lecturaCritica != null ? r.lecturaCritica : '-'}">0</td>
+                        <td th:text="${r.razonamientoCuantitativo != null ? r.razonamientoCuantitativo : '-'}">0</td>
+                        <td th:text="${r.competenciasCiudadanas != null ? r.competenciasCiudadanas : '-'}">0</td>
+                        <td th:text="${r.comunicacionEscrita != null ? r.comunicacionEscrita : '-'}">0</td>
+                        <td th:text="${r.ingles != null ? r.ingles : '-'}">0</td>
+                        <td th:text="${r.nivelInglesCC != null ? r.nivelInglesCC : '-'}">A2</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

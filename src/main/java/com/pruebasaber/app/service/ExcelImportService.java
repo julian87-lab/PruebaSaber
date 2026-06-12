@@ -2,12 +2,16 @@ package com.pruebasaber.app.service;
 
 import com.pruebasaber.app.models.Estudiante;
 import com.pruebasaber.app.models.Resultado;
+import com.pruebasaber.app.models.Rol;
+import com.pruebasaber.app.models.Usuario;
 import com.pruebasaber.app.repository.EstudianteRepository;
 import com.pruebasaber.app.repository.ResultadoRepository;
+import com.pruebasaber.app.repository.UsuarioRepository;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,11 +26,17 @@ public class ExcelImportService {
 
     private final EstudianteRepository estudianteRepository;
     private final ResultadoRepository resultadoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public ExcelImportService(EstudianteRepository estudianteRepository,
-                              ResultadoRepository resultadoRepository) {
+                              ResultadoRepository resultadoRepository,
+                              UsuarioRepository usuarioRepository,
+                              PasswordEncoder passwordEncoder) {
         this.estudianteRepository = estudianteRepository;
         this.resultadoRepository = resultadoRepository;
+        this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -63,7 +73,7 @@ public class ExcelImportService {
                 String segundoApellido = limpiar(formatter.formatCellValue(row.getCell(3)));
                 String primerNombre = limpiar(formatter.formatCellValue(row.getCell(4)));
                 String segundoNombre = limpiar(formatter.formatCellValue(row.getCell(5)));
-                String correoElectronico = limpiar(formatter.formatCellValue(row.getCell(6)));
+                String correoElectronico = limpiar(formatter.formatCellValue(row.getCell(6))).toLowerCase();
                 String numeroTelefono = limpiar(formatter.formatCellValue(row.getCell(7)));
                 String numeroRegistro = limpiar(formatter.formatCellValue(row.getCell(8)));
 
@@ -190,6 +200,15 @@ public class ExcelImportService {
                 e.setActivo(true);
             }
 
+            Usuario usuario = crearOActualizarUsuario(
+                    primerNombre,
+                    primerApellido,
+                    correoElectronico,
+                    numeroDocumento,
+                    e.getUsuario()
+            );
+
+            e.setUsuario(usuario);
             return estudianteRepository.save(e);
         }
 
@@ -206,7 +225,50 @@ public class ExcelImportService {
         nuevo.setSemestre(1);
         nuevo.setActivo(true);
 
+        Usuario usuario = crearOActualizarUsuario(
+                primerNombre,
+                primerApellido,
+                correoElectronico,
+                numeroDocumento,
+                null
+        );
+
+        nuevo.setUsuario(usuario);
         return estudianteRepository.save(nuevo);
+    }
+
+    private Usuario crearOActualizarUsuario(String nombre,
+                                            String apellido,
+                                            String correoElectronico,
+                                            String numeroDocumento,
+                                            Usuario usuarioActual) {
+
+        if (correoElectronico == null || correoElectronico.isBlank()) {
+            return usuarioActual;
+        }
+
+        Optional<Usuario> usuarioPorCorreo = usuarioRepository.findByEmail(correoElectronico);
+
+        Usuario usuario;
+
+        if (usuarioActual != null) {
+            usuario = usuarioActual;
+        } else if (usuarioPorCorreo.isPresent()) {
+            usuario = usuarioPorCorreo.get();
+        } else {
+            usuario = new Usuario();
+            usuario.setEmail(correoElectronico);
+            usuario.setRol(Rol.ESTUDIANTE);
+        }
+
+        usuario.setNombre((nombre == null || nombre.isBlank()) ? "Estudiante" : nombre);
+        usuario.setApellido((apellido == null || apellido.isBlank()) ? "Importado" : apellido);
+        usuario.setEmail(correoElectronico);
+        usuario.setPassword(passwordEncoder.encode(numeroDocumento));
+        usuario.setRol(Rol.ESTUDIANTE);
+        usuario.setActivo(true);
+
+        return usuarioRepository.save(usuario);
     }
 
     private String normalizarNivelGeneral(String nivelExcel, Double puntaje) {

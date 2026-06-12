@@ -72,8 +72,8 @@ public class Estudiante {
     @Column(columnDefinition = "boolean default true")
     private boolean activo = true;
 
-    @OneToOne
-    @JoinColumn(name = "usuario_id")
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", unique = true)
     private Usuario usuario;
 
     @OneToMany(mappedBy = "estudiante", cascade = CascadeType.ALL, orphanRemoval = true)

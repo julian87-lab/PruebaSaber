@@ -175,30 +175,12 @@ public class ExcelImportService {
                                                String correoElectronico,
                                                String numeroTelefono) {
 
-        Optional<Estudiante> existente = estudianteRepository.findByNumeroDocumento(numeroDocumento);
+        Optional<Estudiante> estudiantePorDocumento = estudianteRepository.findByNumeroDocumento(numeroDocumento);
 
-        if (existente.isPresent()) {
-            Estudiante e = existente.get();
-
-            if (!tipoDocumento.isBlank()) e.setTipoDocumento(tipoDocumento);
-            if (!primerApellido.isBlank()) e.setPrimerApellido(primerApellido);
-            if (!segundoApellido.isBlank()) e.setSegundoApellido(segundoApellido);
-            if (!primerNombre.isBlank()) e.setPrimerNombre(primerNombre);
-            if (!segundoNombre.isBlank()) e.setSegundoNombre(segundoNombre);
-            if (!correoElectronico.isBlank()) e.setCorreoElectronico(correoElectronico);
-            if (!numeroTelefono.isBlank()) e.setNumeroTelefono(numeroTelefono);
-
-            if (e.getCodigoEstudiante() == null || e.getCodigoEstudiante().isBlank()) {
-                e.setCodigoEstudiante("COD-" + numeroDocumento);
-            }
-
-            if (e.getSemestre() == null) {
-                e.setSemestre(1);
-            }
-
-            if (!e.isActivo()) {
-                e.setActivo(true);
-            }
+        if (estudiantePorDocumento.isPresent()) {
+            Estudiante e = estudiantePorDocumento.get();
+            actualizarDatosEstudiante(e, tipoDocumento, primerApellido, segundoApellido, primerNombre,
+                    segundoNombre, correoElectronico, numeroTelefono);
 
             Usuario usuario = crearOActualizarUsuario(
                     primerNombre,
@@ -210,6 +192,28 @@ public class ExcelImportService {
 
             e.setUsuario(usuario);
             return estudianteRepository.save(e);
+        }
+
+        Usuario usuario = crearOActualizarUsuario(
+                primerNombre,
+                primerApellido,
+                correoElectronico,
+                numeroDocumento,
+                null
+        );
+
+        if (usuario != null && usuario.getId() != null) {
+            Optional<Estudiante> estudiantePorUsuario = estudianteRepository.findByUsuarioId(usuario.getId());
+            if (estudiantePorUsuario.isPresent()) {
+                Estudiante e = estudiantePorUsuario.get();
+                if (e.getNumeroDocumento() == null || e.getNumeroDocumento().isBlank()) {
+                    e.setNumeroDocumento(numeroDocumento);
+                }
+                actualizarDatosEstudiante(e, tipoDocumento, primerApellido, segundoApellido, primerNombre,
+                        segundoNombre, correoElectronico, numeroTelefono);
+                e.setUsuario(usuario);
+                return estudianteRepository.save(e);
+            }
         }
 
         Estudiante nuevo = new Estudiante();
@@ -224,17 +228,39 @@ public class ExcelImportService {
         nuevo.setCodigoEstudiante("COD-" + numeroDocumento);
         nuevo.setSemestre(1);
         nuevo.setActivo(true);
-
-        Usuario usuario = crearOActualizarUsuario(
-                primerNombre,
-                primerApellido,
-                correoElectronico,
-                numeroDocumento,
-                null
-        );
-
         nuevo.setUsuario(usuario);
+
         return estudianteRepository.save(nuevo);
+    }
+
+    private void actualizarDatosEstudiante(Estudiante e,
+                                           String tipoDocumento,
+                                           String primerApellido,
+                                           String segundoApellido,
+                                           String primerNombre,
+                                           String segundoNombre,
+                                           String correoElectronico,
+                                           String numeroTelefono) {
+
+        if (!tipoDocumento.isBlank()) e.setTipoDocumento(tipoDocumento);
+        if (!primerApellido.isBlank()) e.setPrimerApellido(primerApellido);
+        if (!segundoApellido.isBlank()) e.setSegundoApellido(segundoApellido);
+        if (!primerNombre.isBlank()) e.setPrimerNombre(primerNombre);
+        if (!segundoNombre.isBlank()) e.setSegundoNombre(segundoNombre);
+        if (!correoElectronico.isBlank()) e.setCorreoElectronico(correoElectronico);
+        if (!numeroTelefono.isBlank()) e.setNumeroTelefono(numeroTelefono);
+
+        if (e.getCodigoEstudiante() == null || e.getCodigoEstudiante().isBlank()) {
+            e.setCodigoEstudiante("COD-" + e.getNumeroDocumento());
+        }
+
+        if (e.getSemestre() == null) {
+            e.setSemestre(1);
+        }
+
+        if (!e.isActivo()) {
+            e.setActivo(true);
+        }
     }
 
     private Usuario crearOActualizarUsuario(String nombre,
@@ -250,7 +276,6 @@ public class ExcelImportService {
         Optional<Usuario> usuarioPorCorreo = usuarioRepository.findByEmail(correoElectronico);
 
         Usuario usuario;
-
         if (usuarioActual != null) {
             usuario = usuarioActual;
         } else if (usuarioPorCorreo.isPresent()) {
@@ -259,14 +284,18 @@ public class ExcelImportService {
             usuario = new Usuario();
             usuario.setEmail(correoElectronico);
             usuario.setRol(Rol.ESTUDIANTE);
+            usuario.setPassword(passwordEncoder.encode(numeroDocumento));
         }
 
         usuario.setNombre((nombre == null || nombre.isBlank()) ? "Estudiante" : nombre);
         usuario.setApellido((apellido == null || apellido.isBlank()) ? "Importado" : apellido);
         usuario.setEmail(correoElectronico);
-        usuario.setPassword(passwordEncoder.encode(numeroDocumento));
         usuario.setRol(Rol.ESTUDIANTE);
         usuario.setActivo(true);
+
+        if (usuario.getPassword() == null || usuario.getPassword().isBlank()) {
+            usuario.setPassword(passwordEncoder.encode(numeroDocumento));
+        }
 
         return usuarioRepository.save(usuario);
     }

@@ -1,0 +1,39 @@
+main {
+  background: transparent;
+}
+
+.app-sidebar {
+  min-height: 100vh;
+}
+
+.app-sidebar .border-bottom {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+.app-sidebar h2,
+.app-sidebar .h5,
+.app-sidebar .text-light-emphasis {
+  color: #fff !important;
+}
+
+.app-sidebar .text-light-emphasis {
+  opacity: 0.78;
+}
+
+main .badge.border {
+  border-color: rgba(31, 74, 46, 0.14) !important;
+}
+
+main .card .btn + .btn {
+  margin-left: 0;
+}
+
+@media (max-width: 991.98px) {
+  .app-sidebar {
+    min-height: auto;
+  }
+
+  main {
+    padding: 1rem !important;
+  }
+}

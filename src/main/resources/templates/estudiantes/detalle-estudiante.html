@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detalle del Estudiante</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/app-theme.css}">
+    <link rel="stylesheet" th:href="@{/css/estudiantes.css}">
+</head>
+<body class="bg-light">
+
+<div class="container py-4 page-max">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div class="d-flex align-items-center gap-3">
+            <div class="app-icon-circle">
+                <i class="bi bi-person-vcard-fill fs-4"></i>
+            </div>
+            <div>
+                <h1 class="h3 mb-1">Detalle del Estudiante</h1>
+                <p class="text-muted mb-0">Información general, resultados asociados y beneficio académico.</p>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a sec:authorize="hasRole('ADMIN')" th:href="@{/estudiantes}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a estudiantes
+            </a>
+            <a sec:authorize="hasAnyRole('COORDINADOR','DOCENTE')" th:href="@{/resultados}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Volver a resultados
+            </a>
+            <a th:href="@{/docs/ACUERDO-No.-01-009-CONSEJO-DIRECTIVO-Reglamento-de-Estimulos.pdf}"
+               target="_blank"
+               class="btn btn-outline-danger">
+                <i class="bi bi-file-earmark-pdf me-1"></i> Ver acuerdo
+            </a>
+        </div>
+    </div>
+
+    <section class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-mortarboard section-title-icon"></i>
+                <h2 class="h5 mb-0">Perfil académico</h2>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Nombre completo</small>
+                        <strong th:text="${estudiante.primerNombre + ' ' + estudiante.primerApellido + (estudiante.segundoApellido != null ? ' ' + estudiante.segundoApellido : '')}">
+                            Nombre completo
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Documento</small>
+                        <strong th:text="${estudiante.numeroDocumento}">123</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Estado</small>
+                        <strong th:text="${estudiante.activo ? 'Activo' : 'Inactivo'}">Activo</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Tipo documento</small>
+                        <strong th:text="${estudiante.tipoDocumento != null ? estudiante.tipoDocumento : 'No registrado'}">CC</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Correo</small>
+                        <strong th:text="${estudiante.correoElectronico != null && !estudiante.correoElectronico.isBlank() ? estudiante.correoElectronico : 'No registrado'}">
+                            Correo
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Teléfono</small>
+                        <strong th:text="${estudiante.numeroTelefono != null && !estudiante.numeroTelefono.isBlank() ? estudiante.numeroTelefono : 'No registrado'}">
+                            Teléfono
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Código estudiante</small>
+                        <strong th:text="${estudiante.codigoEstudiante != null && !estudiante.codigoEstudiante.isBlank() ? estudiante.codigoEstudiante : 'No registrado'}">
+                            Código
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Programa</small>
+                        <strong th:text="${estudiante.programa != null && !estudiante.programa.isBlank() ? estudiante.programa : 'No registrado'}">
+                            Programa
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Tipo programa</small>
+                        <strong th:text="${estudiante.tipoPrograma != null && !estudiante.tipoPrograma.isBlank() ? estudiante.tipoPrograma : 'No registrado'}">
+                            Tipo
+                        </strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Semestre</small>
+                        <strong th:text="${estudiante.semestre != null ? estudiante.semestre : 'No registrado'}">1</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Primer nombre</small>
+                        <strong th:text="${estudiante.primerNombre != null ? estudiante.primerNombre : 'No registrado'}">Nombre</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Primer apellido</small>
+                        <strong th:text="${estudiante.primerApellido != null ? estudiante.primerApellido : 'No registrado'}">Apellido</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card shadow-sm border-0 mb-4" th:if="${beneficio != null}">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-award section-title-icon"></i>
+                    <h2 class="h5 mb-0">Beneficio académico</h2>
+                </div>
+
+                <a th:href="@{/docs/ACUERDO-No.-01-009-CONSEJO-DIRECTIVO-Reglamento-de-Estimulos.pdf}"
+                   target="_blank"
+                   class="btn btn-outline-danger btn-sm">
+                    <i class="bi bi-file-earmark-pdf me-1"></i> Ver acuerdo
+                </a>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Tipo de prueba</small>
+                        <strong th:text="${beneficio.tipoPrueba}">Saber Pro</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Rango aplicado</small>
+                        <strong th:text="${beneficio.rango}">241 o más</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Nota seminario</small>
+                        <strong th:text="${beneficio.notaSeminario}">5.0</strong>
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <div class="app-detail-box p-3 h-100">
+                        <small>Beca derecho de grado</small>
+                        <strong th:text="${beneficio.porcentajeBeca}">100%</strong>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="app-detail-box p-3">
+                        <small>Descripción</small>
+                        <strong class="d-block mb-2" th:text="${beneficio.descripcion}">Descripción</strong>
+                        <span class="text-muted d-block" th:text="${beneficio.vigencia}">Vigencia</span>
+                        <span class="text-muted d-block mt-1" th:text="${beneficio.observaciones}">Observaciones</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="card shadow-sm border-0">
+        <div class="card-body">
+            <div class="d-flex align-items-center gap-2 mb-3">
+                <i class="bi bi-bar-chart-line section-title-icon"></i>
+                <h2 class="h5 mb-0">Resultados asociados</h2>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>Periodo</th>
+                        <th>Puntaje global</th>
+                        <th>Nivel global</th>
+                        <th>Lectura crítica</th>
+                        <th>Razonamiento</th>
+                        <th>Inglés</th>
+                        <th>Nivel inglés</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(resultados)}">
+                        <td colspan="7" class="text-center text-muted py-4">Este estudiante no tiene resultados registrados.</td>
+                    </tr>
+
+                    <tr th:each="r : ${resultados}">
+                        <td th:text="${r.periodo != null ? r.periodo : '-'}">2026-1</td>
+                        <td th:text="${r.puntajeGlobal != null ? r.puntajeGlobal : '-'}">0</td>
+                        <td>
+                            <span class="badge bg-primary"
+                                  th:text="${r.nivelPuntajeGlobal != null ? r.nivelPuntajeGlobal : '-'}">
+                                Nivel 3
+                            </span>
+                        </td>
+                        <td th:text="${r.lecturaCritica != null ? r.lecturaCritica : '-'}">0</td>
+                        <td th:text="${r.razonamientoCuantitativo != null ? r.razonamientoCuantitativo : '-'}">0</td>
+                        <td th:text="${r.ingles != null ? r.ingles : '-'}">0</td>
+                        <td th:text="${r.nivelInglesCC != null ? r.nivelInglesCC : '-'}">A2</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
